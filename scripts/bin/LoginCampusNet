@@ -1,0 +1,76 @@
+#! /home/akatsuki/oscript/bin/python3
+
+import requests
+import os
+import json
+
+with open("/home/akatsuki/.cache/info/network","r", encoding="utf-8") as f:
+    account = json.load(f)
+
+username = account['campus']['username']
+password = account['campus']['password']
+url = account['campus']['login']
+
+# imatate the user agent
+headers = {
+    'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0'
+}
+
+requests_cookie = {
+    'failCounter':"0",
+    'JSESSIONID':"F57A739BC698460CB3DFF98424296996",
+    'password':password,
+    'rememberPassword':"true",
+    'username':username
+}
+
+data_form_info = {
+    'qrCodeIdE':'8%AF%B7%E8%BE%93%E5%85%A5%E7%BC%96%E5%8F%B7',
+    'username':username,
+    'pwd':password,
+    'validCode':'%E9%AA%8C%E8%AF%81%E7%A0%81',
+    'validCodeFlag':'false',
+    'ssid':'17786ef3c8bc42bdaf6f488dd41c0ba6',
+    'mac':'dcff2fc23081985ce32865b427240835',
+    't':'wireless-v2',
+    'wlanacname':'413c448712432f5a289aa294bae5caf9',
+    'url':'02a556e49324ea0e00e1922e2ab72da9eb7a08a172b46a4d228424fe91b7ae390776287c67f279399ae7e74673f4575e',
+    'nasip':'c37d0c7e8d834c9d2e9d38c493fb00d6',
+    'wlanuserip':'0209348f4024cd0d5fe9eacbb41552b1'
+}
+
+
+def notify(message: str):
+    command = "notify-send \"{}\" ".format(message)
+    os.system(command)
+
+def is_online():
+    try:
+        response = requests.get('https://www.baidu.com', timeout=2)
+        if response.status_code == 200:
+            return True
+        else:
+            return False
+    except requests.exceptions.ConnectionError:
+        return False
+
+
+def login():
+    try:
+        # 发送POST请求
+        response = requests.post(url, data=data_form_info, headers = headers)
+        # 检查请求是否成功（状态码在200 - 299之间）
+        if response.status_code >= 200 and response.status_code <= 299:
+            response_data = response.json()
+            notify("校园网连接成功!")
+        else:
+            notify(f"请求失败，状态码: {response.status_code}")
+    except requests.RequestException as e:
+        notify(f"请求出现异常: {e}")
+
+
+if __name__ == '__main__':
+    if is_online() == False:
+        login()
+    else:
+        notify('Has been Online')

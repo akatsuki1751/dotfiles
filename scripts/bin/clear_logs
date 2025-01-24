@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# 指定日志目录
+LOG_DIR="$HOME/.logs"
+
+# 用于记录上一次清理的日期
+LAST_CLEAN_FILE="$HOME/.logs/.last_log_clear"
+
+# 检查今天是否为周一
+current_day=$(date +%u) # %u: 周几，1 表示周一
+
+if [ "$current_day" -eq 1 ]; then
+  # 删除记录不存在 或 删除记录的时间与现在时间不同（已经又过了一周了)
+  if [ ! -f "$LAST_CLEAN_FILE" ] || [ "$(date +%Y-%m-%d)" != "$(cat "$LAST_CLEAN_FILE")" ]; then
+    # 将.logs目录下文件变为空文件
+    find "$LOG_DIR" -maxdepth 1 -type f ! -name ".*" -exec truncate -s 0 {} \;
+    echo "Clearing logs in $LOG_DIR..."
+    date +%Y-%m-%d >"$LAST_CLEAN_FILE" # 更新清理日期
+  else
+    echo "$(date "+%Y-%m-%d %H:%M:%S") Logs already cleared today." >>"$LOG_DIR"/cron_log
+  fi
+else
+  echo "$(date "+%Y-%m-%d %H:%M:%S") Logs cannot delete, haven't reach the Monday yet" >>"$LOG_DIR"/cron_log
+fi

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# WEATHER_INFO="$HOME/.cache/info/wether_info"
+WETHER_NOW="https://api.seniverse.com/v3/weather/now.json"
+WETHER_DAILY="https://api.seniverse.com/v3/weather/daily.json"
+API="$(cat "$HOME/.cache/info/weather_api")"
+
+if [ -f "$HOME/.cache/info/city" ]; then
+
+  CITY="$(cat "$HOME/.cache/info/city")"
+
+  if [ -z "$CITY" ]; then
+    msg="$HOME/.cache/city is empty,\n write the city name to it"
+    notify-send -u low -r 20 "$msg"
+    echo "$msg"
+    exit 1
+  else
+    NOW_INFO="$(curl "$WETHER_NOW?key=$API&location=$CITY&unit=c&language=en")"
+    DAILY_INFO="$(curl "$WETHER_DAILY?key=$API&location=$CITY&unit=c&start=-1&language=en&days=5")"
+
+    # check if execute successful, but still something get wrong,
+    if echo "$NOW_INFO" "$DAILY_INFO" | grep -E -q -v "invalid"; then
+      temp1=$(echo "$NOW_INFO" | jq '.results[0]|{location, now}')
+      temp2=$(echo "$DAILY_INFO" | jq '.results[0]|{daily, last_update}')
+      echo "$temp1" "$temp2" | jq -s 'add'
+      exit 0
+    else
+      msg="weather fetch failed\n\"$NOW_INFO\""
+      notify-send -u low -r 20 "$msg"
+      echo "$msg"
+      exit 1
+    fi
+
+  fi
+
+else
+  msg="$HOME/.cache/city does not exist,\n create a file and write the city name to it"
+  notify-send -u low -r 20 "$msg"
+  echo "$msg"
+  exit 1
+fi

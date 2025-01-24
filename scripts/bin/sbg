@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# 定义壁纸文件夹路径
+WALLPAPERS_DIR="$HOME/pictures/wallpapers"
+
+# 获取文件夹内所有图片文件名
+IMAGES=$(ls "$WALLPAPERS_DIR")
+
+# 随机选择一张图片
+RANDOM_IMAGE=$(echo "$IMAGES" | shuf -n 1)
+
+# 设置壁纸
+pgrep 'swaybg' && killall swaybg
+pgrep 'mpvpaper' && killall mpvpaper
+
+swaybg -i "$WALLPAPERS_DIR/$RANDOM_IMAGE" -m fill &

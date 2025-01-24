@@ -1,0 +1,7 @@
+#!/bin/bash
+
+UPDATE_INFO="$HOME/.cache/info/update_packge_info"
+
+ret=$(echo | jq -c '{text:.update_num | tostring, tooltip:.packge_name|tostring}' "$UPDATE_INFO")
+
+echo "$ret"

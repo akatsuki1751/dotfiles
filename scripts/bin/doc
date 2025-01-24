@@ -1,0 +1,17 @@
+#!/bin/bash
+
+COMMAND=$1
+
+if [ "$COMMAND" == "" ]; then
+  echo "please enter the command you want to know."
+  exit 1
+fi
+
+man "$COMMAND" &>/dev/null
+
+if [ "$?" -eq "16" ]; then
+  echo "no such manual entry for $COMMAND"
+  exit 1
+fi
+
+man -Tpdf "$COMMAND" | zathura - &

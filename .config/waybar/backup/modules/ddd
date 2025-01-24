@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# 获取根目录所在设备（去掉分区号）
+device=$(findmnt -n -o SOURCE / | sed -E 's/(p[0-9]+|[0-9]+)$//')
+
+# 累加已用空间和总空间，并计算总使用率
+df -h --block-size=1 | awk -v dev="$device" '
+NR > 1 && $1 ~ dev {
+    used += $3;         # 已用空间（以字节为单位）
+    total += $2;        # 总空间（以字节为单位）
+}
+END {
+    if (total > 0) {
+        usage_rate = (used / total) * 100; # 计算总使用率
+        printf "Device: %s\n", dev;
+        printf "Total Used: %.2f GB\n", used / (1024^3);
+        printf "Total Size: %.2f GB\n", total / (1024^3);
+        printf "Total Usage Rate: %.2f%%\n", usage_rate;
+    } else {
+        print "No matching device found.";
+    }
+}'
+

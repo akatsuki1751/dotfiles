@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# 默认值
+FREQUENCE=7200
+
+# 使用 getopts 解析命令行参数
+while getopts "c:x:t:" opt; do
+  case $opt in
+  c) CACHE="$OPTARG" ;;     # -c 指定 CACHE 路径
+  x) EXEC="$OPTARG" ;;      # -x 指定 EXEC 路径
+  t) FREQUENCE="$OPTARG" ;; # -t 指定 FREQUENCE 时间
+  *)
+    echo "Usage: $0 [-c cache_path] [-x exec_path] [-t frequence_seconds]"
+    echo "default frequence: 15min"
+    exit 1
+    ;;
+  esac
+done
+
+# 检查必要的路径是否存在
+if [ ! -f "$EXEC" ]; then
+  echo "Error: Executable $EXEC not found!"
+  echo "Usage: $0 [-c cache_path] [-x exec_path] [-t frequence_seconds]"
+  echo "default frequence: 15min"
+  exit 1
+fi
+
+if [ ! -d "$(dirname "$CACHE")" ]; then
+  echo "Error: Directory for CACHE $CACHE does not exist!"
+  echo "Usage: $0 [-c cache_path] [-x exec_path] [-t frequence_seconds]"
+  echo "default frequence: 15min"
+  exit 1
+fi
+
+# 核心逻辑
+update_time="$(stat -c "%Y" "$CACHE" 2>/dev/null || echo 0)"
+current_time="$(date +%s)"
+
+if ((current_time - update_time > FREQUENCE)); then
+  output=$(bash "$EXEC" 2>&1)
+  status=$?
+  if [ $status -eq 0 ]; then
+    echo "$output" >"$CACHE"
+    echo "$(date "+%Y-%m-%d %H:%M:%S") $(basename "$EXEC") SUCCESS" >>/home/akatsuki/.logs/cron_log
+    exit 0
+  else
+    echo "$(date "+%Y-%m-%d %H:%M:%S") $output" >>/home/akatsuki/.logs/cron_error_log
+    exit 1
+  fi
+else
+  echo "$(date "+%Y-%m-%d %H:%M:%S") $(basename "$EXEC") already updated" >>/home/akatsuki/.logs/cron_log
+  exit 0
+fi

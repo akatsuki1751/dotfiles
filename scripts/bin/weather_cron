@@ -1,0 +1,24 @@
+#! /bin/bash
+
+CACHE="/home/akatsuki/.cache/info/weather_info"
+EXEC="/home/akatsuki/.local/bin/weather"
+FREQUENCE=3600
+
+update_time="$(stat -c "%Y" "$CACHE")"
+current_time="$(date +%s)"
+
+if ((current_time - update_time > FREQUENCE)); then
+  output=$(bash "$EXEC")
+  status=$?
+  if [ $status -eq 0 ]; then
+    echo "$output" >"$CACHE"
+    echo "$(date "+%Y-%m-%d %H:%M:%S") $(basename "$EXEC") SUCCESS" >>/home/akatsuki/.logs/cron_log
+    exit 0
+  else
+    echo "$(date "+%Y-%m-%d %H:%M:%S") $output" >>/home/akatsuki/.logs/cron_error_log
+    exit 1
+  fi
+else
+  echo "$(date "+%Y-%m-%d %H:%M:%S") $(basename "$EXEC") already updateded" >>/home/akatsuki/.logs/cron_log
+  exit 0
+fi

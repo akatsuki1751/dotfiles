@@ -1,0 +1,6 @@
+#! /bin/bash
+
+stow ~/dotfiles/scripts/ -t ~/.local
+stow ~/dotfiles/.config/ -t ~/.config
+
+rm -r .config/ && cp -r ./backup/config_bak/ ./.config/

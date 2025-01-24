@@ -1,0 +1,11 @@
+#!/bin/bash
+
+jobs=$(crontab -l | awk 'NR > 2 {if ($0 ~ /reb/) {for (i=2; i<=NF; i++) printf "%s ", $i} else {for (i=6; i<=NF; i++) printf "%s ", $i}; print ""}')
+
+while IFS= read -r command; do
+  echo "Executing: $command"
+  # bash exe-file-path, bash -c "command": will parse string as command and execute
+  bash -c "$command"
+done <<<"$jobs"
+
+echo "cronjob done!"

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+PAPER_PATH="$HOME/pictures/videopapers/"
+RANDOM_PAPER=$(fd . "$PAPER_PATH" --type f | shuf -n 1)
+
+pgrep 'swaybg' && killall swaybg
+pgrep 'mpvpaper' && killall mpvpaper
+
+# -f: run in background
+# -s: when app in ~/.config/mpvpaper/stoplist covering the desktop, mpvpaper will automatically stop to save the CPU usage
+# -n: slideshow mode: play the next video in a playlist,
+#     cordinating with `-o "loop loop-playlist`
+# -o: options you gotta give
+# options:
+#   1. no-audio
+#   2. loop
+#   3. loop-playlist
+#   4. input-ipc-server=/tmp/mpv-socket: coordinating with `-f` OPTIONS,
+#      to create a server to handle your commands of controling the video playing
+#      using `echo <command> | socat - /tmp/mpv-socket` delivering command to server
+mpvpaper -f -s -o "no-audio loop input-ipc-server=/tmp/mpv-socket " '*' "$PAPER_PATH"

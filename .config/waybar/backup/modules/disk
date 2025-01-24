@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# 获取根目录所在设备（去掉分区号）
+device=$(findmnt -n -o SOURCE / | sed -E 's/(p[0-9]+|[0-9]+)$//')
+
+# 筛选出属于该设备的挂载点并格式化输出
+tooltip=$(df -h | awk -v dev="$device" '
+NR > 1 && $1 ~ dev { 
+    mount=$NF; 
+    use_percent=$(NF-1); 
+    used=$(NF-3); 
+    size=$(NF-4); 
+    printf "%s\t%s - %sB / %sB\n", mount, use_percent, used, size
+  }')
+
+text=$(df -h --block-size=1 | awk -v dev="$device" '
+NR > 1 && $1 ~ dev {
+    used += $3;         # 已用空间（以字节为单位）
+    total += $2;        # 总空间（以字节为单位）
+}
+END {
+    if (total > 0) {
+        usage_rate = (used / total) * 100; # 计算总使用率
+        printf "  %.1fG/%.1fG  \n", used / (1024^3), total / (1024^3);
+    } else {
+        print "No matching device found.";
+    }
+  }')
+
+output=$(jq -n -c --arg text "$text" --arg tooltip "$tooltip" \
+  '{text: $text, tooltip: $tooltip}')
+
+echo "$output"

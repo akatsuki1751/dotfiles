@@ -1,0 +1,40 @@
+#!/bin/bash
+
+STATIC_PAPER="$HOME/pictures/wallpapers/"
+DYNAMIC_PAPER="$HOME/pictures/videopapers/"
+
+menu_form() {
+  rofi -dmenu \
+    -theme "$HOME/.config/rofi/themes/catppuccin-latte.rasi"
+}
+
+menu1() {
+  echo -e "Change wallpaper\nChange dynamic wallpaper" | menu_form
+}
+
+change_wallpaper() {
+  if [ "$1" == '--static' ]; then
+    # pic=$(ls "$STATIC_PAPER" | menu_form)
+    # sbg "$STATIC_PAPER$pic" &>/dev/null
+    PREVIEW=true rofi -theme latte_image.rasi -show filebrowser \
+      -filebrowser-command 'sbg' -filebrowser-directory "$STATIC_PAPER"
+  elif [ "$1" == "--dynamic" ]; then
+    # vid=$(ls "$DYNAMIC_PAPER" | menu_form)
+    # dbg "$DYNAMIC_PAPER$vid" &>/dev/null
+    PREVIEW=true rofi -theme latte_image.rasi -show filebrowser \
+      -filebrowser-command 'dbg' -filebrowser-directory "$DYNAMIC_PAPER"
+  fi
+}
+
+option="$(menu1)"
+case $option in
+"Change wallpaper")
+  change_wallpaper --static
+  ;;
+"Change dynamic wallpaper")
+  change_wallpaper --dynamic
+  ;;
+"")
+  exit 250
+  ;;
+esac

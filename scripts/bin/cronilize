@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# 默认值
+# turn scripts into cronjob
+
+# 默认更新频率,单位:second
 FREQUENCE=7200
 
 # 使用 getopts 解析命令行参数

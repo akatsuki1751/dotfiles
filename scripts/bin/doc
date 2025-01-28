@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# using pdf reader to look up the manual
+# transform the man pages into stdout and piping to zathura (a lightweight pdf reader)
 
 COMMAND=$1
 

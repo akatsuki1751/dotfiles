@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# fast access the rofi dmenu scripts
+
+menu_format() {
+  rofi -dmenu \
+    -theme "$HOME/.config/rofi/themes/catppuccin-latte.rasi"
+}
+
+main_menu=$(ls "$HOME/.config/rofi/scripts/")
+
+menu() {
+  echo "$main_menu" | menu_format
+}
+
+# rofi default quit(`Esc`) return code is 126
+# quit code of submenu is  127, returning to the main menu(applets)
+
+while :; do
+  command="$(menu)"
+  bash "$HOME/.config/rofi/scripts/$command"
+  status=$?
+  #  notify-send $status # for testing
+  if [[ $status -eq 0 ]]; then
+    exit 0
+  elif [[ $status -eq 127 ]]; then
+    notify-send "no such a option"
+    exit 1
+  elif [[ $status -eq 126 ]]; then
+    exit 0
+  elif [[ $status -eq 250 ]]; then
+    continue
+  else
+    exit 1
+  fi
+done

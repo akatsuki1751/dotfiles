@@ -1,16 +1,25 @@
 #!/bin/bash
+#
+# argument 1: picture path
+# if exist argument, check if it's a correct picture file and set it as wallpaper
+# if no argument, randomly picking a picture as wallpaper
 
 # 定义壁纸文件夹路径
 WALLPAPERS_DIR="$HOME/pictures/wallpapers"
+pic="$1"
 
 # 获取文件夹内所有图片文件名
-IMAGES=$(ls "$WALLPAPERS_DIR")
-
-# 随机选择一张图片
-RANDOM_IMAGE=$(echo "$IMAGES" | shuf -n 1)
+if [[ -z "$pic" ]]; then
+  IMAGE="$WALLPAPERS_DIR/$(ls "$WALLPAPERS_DIR" | shuf -n 1)"
+elif [ -e "$pic" ]; then
+  IMAGE="$pic"
+else
+  notify-send "argument error, please passing a picture path"
+  exit 1
+fi
 
 # 设置壁纸
 pgrep 'swaybg' && killall swaybg
 pgrep 'mpvpaper' && killall mpvpaper
 
-swaybg -i "$WALLPAPERS_DIR/$RANDOM_IMAGE" -m fill &
+swaybg -i "$IMAGE" -m fill &>/dev/null &

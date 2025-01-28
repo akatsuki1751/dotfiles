@@ -1,22 +1,28 @@
 #!/bin/bash
 
+# check the available upgradable packages
+
 upgrade_info=$(paru -Q --upgrades 2>/dev/null)
 
+# handle the fail situation
+# 1. output mess stuff --- network error
+# 2. output empty string --- no upgradable packages yet
 if [ $? -eq 1 ]; then
   if [ "$upgrade_info" != "" ]; then
     echo "cannot request the server. check network"
     exit 1
   else
-    result=$(echo | jq -n '{"update_num": 0, "packge_name":[]}')
+    result=$(echo | jq -n '{"update_num": 0, "package_name":[]}')
     echo "$result"
     exit 0
   fi
 fi
 
-count=$(echo upgrade_info | wc -l)
-packges=$(echo "$upgrade_info" | jq -R -s 'split("\n")[:-1]')
+# return in json format
+count=$(echo "$upgrade_info" | sed 's/ \([^ ]*\) \([^ ]*\) -> \([^ ]*\)/\n\1 \2 -> \3/g' | wc -l)
+packages=$(echo "$upgrade_info" | jq -R -s 'split("\n")[:-1]')
 
-result=$(echo | jq -n --argjson update_num "$count" --argjson packge_name "$packges" '{update_num: $update_num, packge_name: $packge_name}')
+result=$(echo | jq -n --argjson update_num "$count" --argjson package_name "$packages" '{update_num: $update_num, package_name: $package_name}')
 
 echo "$result"
 exit 0

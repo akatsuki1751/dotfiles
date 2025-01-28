@@ -1,4 +1,6 @@
 #! /bin/bash
+#
+# fetching the weather infomation every 1h
 
 CACHE="/home/akatsuki/.cache/info/weather_info"
 EXEC="/home/akatsuki/.local/bin/weather"

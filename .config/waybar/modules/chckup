@@ -1,7 +1,11 @@
 #!/bin/bash
+#
+# using the checkupdate's output to display the upgradable packages
 
 UPDATE_INFO="$HOME/.cache/info/update_packge_info"
 
-ret=$(echo | jq -c '{text:.update_num | tostring, tooltip:.packge_name|tostring}' "$UPDATE_INFO")
+tooltip=$(jq -r '.package_name[]' "$UPDATE_INFO" | tr ',' '\n' | awk '{print $1}')
+
+ret=$(echo | jq -c --arg tooltip "$tooltip" '{text:.update_num, tooltip:$tooltip}' "$UPDATE_INFO")
 
 echo "$ret"

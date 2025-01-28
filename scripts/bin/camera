@@ -1,3 +1,5 @@
 #!/bin/bash
 
+# capture camera images through mpv
+
 mpv --profile=low-latency --untimed /dev/video0

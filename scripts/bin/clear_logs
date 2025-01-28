@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# 指定日志目录
+# clear the files in ~/.logs/
+
 LOG_DIR="$HOME/.logs"
 
 # 用于记录上一次清理的日期

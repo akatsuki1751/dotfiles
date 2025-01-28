@@ -1,4 +1,6 @@
 #! /home/akatsuki/oscript/bin/python3
+#
+# login school's campus network through post account info to certain website
 
 import requests
 import os

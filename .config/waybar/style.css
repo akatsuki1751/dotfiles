@@ -1,217 +1,385 @@
+@define-color rosewater #f4dbd6;
+@define-color flamingo #f0c6c6;
+@define-color pink #f5bde6;
+@define-color mauve #c6a0f6;
+@define-color red #ed8796;
+@define-color maroon #ee99a0;
+@define-color peach #f5a97f;
+@define-color yellow #eed49f;
+@define-color green #a6da95;
+@define-color teal #8bd5ca;
+@define-color sky #91d7e3;
+@define-color sapphire #7dc4e4;
+@define-color blue #8aadf4;
+@define-color lavender #b7bdf8;
+@define-color text #cad3f5;
+@define-color subtext1 #b8c0e0;
+@define-color subtext0 #a5adcb;
+@define-color overlay2 #939ab7;
+@define-color overlay1 #8087a2;
+@define-color overlay0 #6e738d;
+@define-color surface2 #5b6078;
+@define-color surface1 #494d64;
+@define-color surface0 #363a4f;
+@define-color base #24273a;
+@define-color mantle #1e2030;
+@define-color crust #181926;
+
 * {
-  border: none;
-  border-radius: 0;
-  min-height: 0;
-  font-family: JetBrainsMono Nerd Font;
-  font-size: 13px;
+  font-family: "JetBrainsMono Nerd Font", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
 }
 
 window#waybar {
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
+  border-radius: 13px;
   transition-property: background-color;
-  transition-duration: 0.3s;
+  transition-duration: .5s;
 }
 
-window#waybar.hidden {
-  opacity: 0.3;
+button {
+  /* Use box-shadow instead of border so the text isn't offset */
+  box-shadow: inset 0 -3px transparent;
+  /* Avoid rounded borders under each button name */
+  border: none;
+  border-radius: 0;
+}
+
+/* https://github.com/Alexays/Waybar/wiki/FAQ#the-workspace-buttons-have-a-strange-hover-effect */
+button:hover {
+  background: inherit;
+  box-shadow: inset 0 -3px #ffffff;
+}
+
+/* you can set a style on hover for any module like this */
+#pulseaudio:hover {
+  background-color: @surface2;
 }
 
 #workspaces {
-  background-color: transparent;
+  padding: 3px 0px;
 }
+
 
 #workspaces button {
-  all: initial;
-  /* Remove GTK theme values (waybar #1351) */
-  min-width: 0;
-  /* Fix weird spacing in materia (waybar #450) */
-  box-shadow:  4px 5px #0f0f16;
-  /* Use box-shadow instead of border so the text isn't offset */
-  padding: 6px 12px;
-  margin: 6px 3px;
-  border-radius: 4px;
-  background-color: #1e1e2e;
-  color: #cdd6f4;
-  transition:all 0.2s ease-in-out;
-}
-
-#workspaces button.active {
-  padding: 6px 18px;
-  color: #1e1e2e;
-  background-color: #cdd6f4;
-  box-shadow: 4px 5px #182c6f;
+  padding: 0 5px;
+  background-color: rgba(91, 96, 120, 0.3);
+  margin: 3px 3px;
+  border-radius:50px;
+  color: rgba(255,255,255,0.4);
+  font-weight: bolder;
+  transition:all 0.2s ease-in-out; /*cubic-bezier(.55,-0.68,.48,1.68);*/ 
 }
 
 #workspaces button:hover {
-  box-shadow: inherit;
-  text-shadow: inherit;
-  color: #1e1e2e;
-  background-color: #cdd6f4;
+  background: rgba(0, 0, 0, 0.2);
 }
 
-#workspaces button.urgent {
-  background-color: #f38ba8;
+#workspaces button.active {
+  background-color: rgba(220,220,220,0.9);
+  margin: 3px 3px;
+  color: #181818;
+  padding: 0 11px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  border-radius:15px;
+  font-weight: bolder;
+  transition:all 0.2s ease-in-out; /*cubic-bezier(.55,-0.68,.48,1.68);*/ 
+}
+
+#workspaces button.focused {
+  background-color: @lavender;
+  box-shadow: inset 0 -3px #ffffff;
 }
 
 
-/* for normal module*/
-#pulseaudio,
-#bluetooth,
+#mode {
+  background-color: #64727D;
+  box-shadow: inset 0 -3px #ffffff;
+}
+
+
+#clock,
 #battery,
+#bluetooth,
 #backlight,
-#network,
-#custom-keystate,
 #custom-wether,
+#custom-keystate,
+#custom-power,
 #custom-hardware,
 #custom-system,
-#custom-power,
-#clock,
-#custom-updates,
-#mpd,
+#idle_inhibitor,
+#power-profiles-daemon,
+#tray,
+#cpu,
+#memory,
+#temperature,
+#network,
 #custom-notification,
-#tray {
-  border-radius: 4px;
-  margin: 0px 5px 5px 3px;
-  padding: 6px 12px;
-  color: #181825;
-}
-
-#custom-notification {
-  background-color: #cd544d;
-  box-shadow: 4px 5px #712420;
+#custom-notification,
+#mpd,
+#custom-updates,
+#pulseaudio {
+  padding: 0 10px;
+  background-color: transparent;
+  border-radius: 5px;
 }
 
 #custom-updates {
-  background-color: #1794D1;
-  box-shadow: 4px 5px #0e1f6d;
+  color: #1794D1;
 }
 
-#tray {
-  background-color: rgb(176, 233, 179);
-  box-shadow: 4px 5px #227826;
-}
-
-#custom-hardware {
-  background-color: #c0b7f4 ;
-  box-shadow: 4px 5px #251484;
-}
-
-#custom-system {
-  background-color: rgb(150, 247, 247);
-  box-shadow: 4px 5px #0a8484;
-}
-
-#custom-power {
-  margin-right: 6px;
-  background-color: #ff4d4d;
-  box-shadow: 4px 5px 3px #4c0000;
-}
-
-#battery {
-  background-color: rgb(243, 139, 168);
-  box-shadow: 4px 5px #730c29;
-}
-
-#battery.warning,
-#battery.critical,
-#battery.urgent {
-  background-color: rgb(255, 0, 0);
-  box-shadow: 4px 5px rgb(153, 0, 0);
-  color: #FFFF00;
-}
-
-#battery.charging {
-  background-color: rgb(166, 227, 161);
-  box-shadow: 4px 5px #297623;
-  color: #181825;
-}
-
-#backlight {
-  background-color: rgb(250, 179, 135);
-  box-shadow: 4px 5px #903b06;
+#custom-notification {
+  color: #cd544d;
 }
 
 #pulseaudio {
-  background-color: rgb(205, 214, 244);
-  box-shadow: 4px 5px #1f398f;
+  color: @maroon;
 }
-
-#bluetooth {
-  background-color: rgb(63, 185, 183);
-  box-shadow: 4px 5px #26706f;
-}
-
 
 #network {
-  background-color: rgb(148, 226, 213);
-  box-shadow: 4px 5px #1e6d60;
-  padding-right: 17px;
-}
-
-#clock {
-  font-family: JetBrainsMono Nerd Font;
-  background-color: rgb(203, 166, 247);
-  box-shadow: 3px 5px #2e085b;
-}
-
-#custom-keystate {
-  background-color: rgb(242, 205, 205);
-  box-shadow: 4px 5px #792020;
-}
-
-#custom-wether {
-  background-color: rgb(244, 225, 161);
-  box-shadow: 4px 5px #866b10;
-}
-
-/* for modules in  drawer*/
-
-#cpu,
-#temperature,
-#memory,
-#custom-disk,
-#idle_inhibitor,
-#power-profiles-daemon,
-#custom-quit,
-#custom-lock,
-#custom-reboot {
-  padding: 6px 12px;
-  margin-bottom: 5px;
-}
-
-#power-profiles-daemon {
-  background-color: #a7e6e6;
-}
-
-
-#idle_inhibitor {
-  background-color: #ace1e1;
-}
-
-#cpu {
-  background-color: #beb4f7;
+  color: @yellow;
 }
 
 #temperature {
-  background-color: #c2baf1;
+  color: @sky;
 }
 
+#battery {
+  color: @green;
+}
+
+#clock {
+  color: @flamingo;
+}
+
+#window {
+  color: @rosewater;
+}
+
+.modules-right,
+.modules-left,
+.modules-center {
+  background-color: @base;
+  border-radius: 15px;
+}
+
+.modules-right {
+  padding: 0 10px;
+}
+
+.modules-left {
+  padding: 0 20px;
+}
+
+.modules-center {
+  padding: 0 10px;
+}
+
+#battery.charging,
+#battery.plugged {
+  color: @sapphire;
+}
+
+@keyframes blink {
+  to {
+    color: #000000;
+  }
+}
+
+/* Using steps() instead of linear as a timing function to limit cpu usage */
+#battery.critical:not(.charging) {
+  background-color: #f53c3c;
+  color: #ffffff;
+  animation-name: blink;
+  animation-duration: 0.5s;
+  animation-timing-function: steps(12);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+label:focus {
+  background-color: #000000;
+}
+
+#pulseaudio.muted {
+  color: @text;
+}
+
+#bluetooth {
+  color: @teal;
+}
+
+#bluetooth.connected {
+  color: @green;
+}
+
+#bluetooth.disconnected {
+  color: @red;
+  animation-name: blink;
+  animation-duration: 1s;
+  animation-timing-function: steps(12);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+#bluetooth:hover {
+  background-color: @surface2;
+}
+
+#backlight {
+  color: @yellow;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#backlight:hover {
+  background-color: @surface2;
+  color: @flamingo;
+}
+
+#backlight.low {
+  color: @red; /* Low brightness level */
+}
+
+#backlight.medium {
+  color: @yellow; /* Medium brightness level */
+}
+
+#backlight.high {
+  color: @green; /* High brightness level */
+}
+
+#backlight.off {
+  color: @overlay1; /* When backlight is turned off */
+}
+
+#custom-wether {
+  color: @yellow;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#custom-keystate {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bolder;
+}
+
+#custom-keystate.caps-on {
+  color: red; /* 大写时红色 */
+}
+
+#custom-keystate.caps-off {
+  color: green; /* 小写时绿色 */
+}
+
+/* 鼠标悬停时显示托盘 */
+
+/******************************/
+/********* GROUP POWER ********/
+/******************************/
+
+/* 主容器样式 */
+#group-power {
+  background-color: transparent; /* 背景颜色 */
+  border-radius: 8px; /* 圆角 */
+  margin: 0 5px; /* 外边距 */
+  transition: color 0.3s ease; /* 背景色平滑过渡 */
+}
+
+/* 主按钮样式（Power） */
+#group-power #custom-power {
+  font-size: 18px; /* 图标大小 */
+  color: @rosewater; /* 主按钮颜色 */
+  transition: color 0.3s ease; /* 动画效果 */
+}
+
+#group-power #custom-power:hover {
+  color: @red; /* 鼠标悬停时变为红色 */
+}
+#group-power #custom-quit {
+  color: @surface2; /* 鼠标悬停时变为红色 */
+}
+#group-power #custom-lock {
+  color: white; /* 鼠标悬停时变为红色 */
+}
+#group-power #custom-reboot {
+  color: @green; /* 鼠标悬停时变为红色 */
+}
+
+#group-hardware {
+  background-color: transparent; /* 背景颜色 */
+  border-radius: 8px; /* 圆角 */
+  margin: 0 5px; /* 外边距 */
+  transition: color 0.3s ease; /* 背景色平滑过渡 */
+}
+
+#cpu {
+  color: orange; /* 鼠标悬停时变为红色 */
+}
 #memory {
-  background-color: #c7c1ea;
+  color: white; /* 鼠标悬停时变为红色 */
 }
-
 #custom-disk {
-  background-color: #cbc7e4;
+  color: @flamingo; /* 鼠标悬停时变为红色 */
+}
+#custom-hardware {
+     color: #98C379;
 }
 
-#custom-reboot {
-  background-color: #f15b5b;
+#custom-system {
+     color: grey;
 }
 
-#custom-lock {
-  background-color: #e46868;
+#idle_inhibitor {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-#custom-quit {
-  background-color: #d67676;
+#idle_inhibitor.activated {
+  color: red;
+}
+
+#idle_inhibitor.deactivated {
+  color: green;
+}
+
+#power-profiles-daemon {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#power-profiles-daemon.performance {
+  color: red;
+}
+
+#power-profiles-daemon.balanced {
+  color: yellow;
+}
+
+#power-profiles-daemon.power-saver {
+  color: green;
+}
+
+#tray {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#tray:hover {
+  opacity: 1; /* 完全显示托盘 */
+}
+
+/* 托盘中需要注意的图标 */
+#tray.need-attention {
+  animation: blink 1s steps(2) infinite; /* 闪烁动画 */
+}
+
+/* 闪烁动画 */
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }

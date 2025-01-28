@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# for fast search my config files
+
+APPCONFIG="$HOME/dotfiles/.config/"
+SCRIPTS="$HOME/dotfiles/scripts/"
+THEME="$HOME/.config/rofi/themes/nord-multilines.rasi"
+
+configs=$(fd --type f '' "$APPCONFIG" "$SCRIPTS" | awk -F/ '{for (i=6; i<=NF; i++) printf "%s%s", $i, (i==NF ? "\n" : "/")}')
+selected_file=$(echo "$configs" | rofi -dmenu -theme "$THEME")
+
+if [[ -z "$selected_file" ]]; then
+  exit 250
+elif ! echo "$configs" | grep -q "$selected_file"; then
+  notify-send "no such a file"
+  exit 1
+elif echo "$selected_file" | awk -F/ '{print $1}' | rg -q '^bin$'; then
+  kitty $EDITOR "$SCRIPTS""$selected_file"
+else
+  kitty $EDITOR "$APPCONFIG""$selected_file"
+fi

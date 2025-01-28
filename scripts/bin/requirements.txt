@@ -1,0 +1,13 @@
+pacman/AUR:
+mpv
+paru
+jq
+mpvpaper
+cronie
+swaybg
+zathura
+rofi
+
+pip3:
+request
+

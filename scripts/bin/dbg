@@ -1,7 +1,20 @@
 #!/bin/bash
+#
+# argument 1: video path
+# if exist argument, check if it's a correct video file and set it as wallpaper
+# if no argument, randomly picking a video as wallpaper
 
 PAPER_PATH="$HOME/pictures/videopapers/"
-RANDOM_PAPER=$(fd . "$PAPER_PATH" --type f | shuf -n 1)
+vid="$1"
+
+if [ -z "$1" ]; then
+  PAPER=$(fd . "$PAPER_PATH" --type f | shuf -n 1)
+elif [ -e "$1" ]; then
+  PAPER="$vid"
+else
+  notify-send "argument error, please passing a video path"
+  exit 1
+fi
 
 pgrep 'swaybg' && killall swaybg
 pgrep 'mpvpaper' && killall mpvpaper
@@ -18,4 +31,4 @@ pgrep 'mpvpaper' && killall mpvpaper
 #   4. input-ipc-server=/tmp/mpv-socket: coordinating with `-f` OPTIONS,
 #      to create a server to handle your commands of controling the video playing
 #      using `echo <command> | socat - /tmp/mpv-socket` delivering command to server
-mpvpaper -f -s -o "no-audio loop input-ipc-server=/tmp/mpv-socket " '*' "$PAPER_PATH"
+mpvpaper -f -s -o "no-audio loop input-ipc-server=/tmp/mpv-socket " '*' "$PAPER"

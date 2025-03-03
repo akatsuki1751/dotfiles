@@ -1,0 +1,153 @@
+#!/bin/bash
+
+set +x
+
+time=$(date +%Y-%m-%d_%H:%M:%S)
+dir="$HOME/pictures/Screenshots"
+file="${time}.png"
+
+option=$1
+
+if [[ ! -d "$dir" ]]; then
+  mkdir -p "$dir"
+fi
+
+# notify
+notify_user() {
+  if [[ -e "$dir/$file" ]]; then
+    notify-send -u low -i "${dir}/${file}" "Saved as ${dir}/${file}"
+  else
+    notify-send -u low "Cancel screenshot"
+  fi
+}
+
+# get the geometry info of your windows
+# watch_window_change: working in background, and check the events of hyprland. and hanlde the events by `handle`
+# handle: if there are events that change the window layout(workspace change, open a new window, close a window), it will check and generate a new box info for new window's layout
+# getbox: generate the current workspace's windows layout, it's a "111,222 333x444"(first two nums are window's top-left vertex's position, last two nums are the size of window)
+# slurp_loop: maintain a slurp in frontground with option `-r`, which will receive the box info, and highlight the current hovering window
+get_geometry() {
+  cleanup() {
+    kill -- -$watch_pid 2>/dev/null # 终止所有子进程
+    pkill -P $watch_pid 2>/dev/null # 终止所有子进程
+    pkill slurp 2>/dev/null
+    rm -f "$fifo"
+  }
+
+  get_box() {
+    local box=$(hyprctl -j clients | jq -r '[.[] | select(.workspace.id == '$1')]' | jq -r '.[] | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')
+    echo "$box"
+  }
+
+  handle() {
+    local do=0
+    local ws=$(hyprctl activeworkspace -j | jq -r '.id')
+    case $1 in
+    workspacev2*)
+      ws=$(echo "$line" | grep -oP '>>\K[0-9]+')
+      do=1
+      ;;
+    openwindow* | closewindow*)
+      do=1
+      ;;
+    esac
+
+    if [ $do -eq 1 ]; then
+      pkill slurp 2>/dev/null
+      get_box "$ws" >"$fifo"
+    fi
+  }
+
+  watch_window_change() {
+    trap 'exit 0' INT TERM # 确保 SIGTERM 终止进程
+    local current_ws=$(hyprctl activeworkspace -j | jq -r '.id')
+    get_box "$current_ws" >"$fifo"
+
+    socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock |
+      while read -r line; do
+        handle "$line"
+      done
+  }
+
+  slurp_loop() {
+    local boxes=""
+    local geometry=""
+    while true; do
+      boxes=$(cat "$fifo")
+      [[ -z "$boxes" ]] && continue
+
+      boxes=$(echo "$boxes" | awk '{for(i=1; i<=NF; i+=2) print $i, $(i+1)}')
+
+      geometry=$(slurp -r <<<"$boxes")
+      ret=$?
+
+      if [[ $ret -eq 0 ]]; then
+        echo "$geometry"
+        break
+      elif [[ $ret -eq 1 ]]; then
+        echo ""
+        break
+      fi
+    done
+  }
+  # prologue
+  trap cleanup INT TERM # cleanup endless process when exit in unexpect way
+  fifo="/tmp/slurp_boxes_fifo"
+  watch_pid=0
+  local geometry=""
+  rm -f "$fifo"
+  mkfifo "$fifo" || exit 1
+
+  watch_window_change &
+  watch_pid=$!
+  sleep 0.1
+
+  geometray=$(slurp_loop)
+  cleanup # kill the still runing watch process
+  echo "$geometray"
+}
+
+shotwin() {
+  cd "${dir}" || exit
+  geometray=$(get_geometry)
+  [ -z "$geometray" ] && notify_user && exit 1
+
+  grim -g "$geometray" - | swappy -f - -o "$file"
+  wl-copy <"${dir}"/"$file"
+  notify_user
+}
+
+# take shots
+shotscreen() {
+  cd "${dir}" && grim "$file"
+  wl-copy <"${dir}"/"$file"
+  notify_user
+}
+
+shotarea() {
+  cd "${dir}" && grim -g "$(slurp)" - | swappy -f - -o "$file"
+  wl-copy <"${dir}"/"$file"
+  notify_user
+}
+
+if [ -z "$option" ]; then
+  option="--screen"
+fi
+
+# check if it has been launched
+if pgrep 'slurp'; then
+  notify-send "In used currently"
+  exit 1
+fi
+
+if [ "$1" == "--screen" ]; then
+  sleep 0.3 && shotscreen
+elif [ "$1" == "--area" ]; then
+  sleep 0.3 && shotarea
+elif [ "$1" == "--window" ]; then
+  sleep 0.3 && shotwin
+else
+  echo "no such a flag"
+fi
+
+exit 0

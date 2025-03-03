@@ -1,0 +1,17 @@
+#!/bin/bash
+
+NOTES="$HOME/Archives/"
+THEME="$HOME/.config/rofi/themes/nord-multilines.rasi"
+
+note=$(fd --type f '' "$NOTES" | awk -F/ '{for (i=5; i<=NF; i++) printf "%s%s", $i, (i==NF ? "\n" : "/")}')
+selected_file=$(echo "$note" | rofi -dmenu -theme "$THEME")
+
+if [[ -z "$selected_file" ]]; then
+  exit 250
+elif ! echo "$note" | grep -q "$selected_file"; then
+  notify-send "no such a file"
+  exit 1
+else
+  kitty $EDITOR "$NOTES""$selected_file"
+  exit 0
+fi

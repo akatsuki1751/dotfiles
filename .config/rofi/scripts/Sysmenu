@@ -9,7 +9,7 @@ menu_form() {
 }
 
 menu1() {
-  echo -e "Change wallpaper\nChange dynamic wallpaper" | menu_form
+  echo -e "Change wallpaper\nChange dynamic wallpaper\nScreenshot" | menu_form
 }
 
 change_wallpaper() {
@@ -26,6 +26,24 @@ change_wallpaper() {
   fi
 }
 
+screen_shot() {
+  option=$(echo -e "Screen\nArea\nWindow" | menu_form)
+  case $option in
+  "Screen")
+    shot --screen
+    ;;
+  "Area")
+    shot --area
+    ;;
+  "Window")
+    shot --window
+    ;;
+  "")
+    exit 250
+    ;;
+  esac
+}
+
 option="$(menu1)"
 case $option in
 "Change wallpaper")
@@ -33,6 +51,9 @@ case $option in
   ;;
 "Change dynamic wallpaper")
   change_wallpaper --dynamic
+  ;;
+"Screenshot")
+  screen_shot
   ;;
 "")
   exit 250

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+file="$1"
+
+if [ -z "$2" ]; then
+  dir=$(dirname "$file")
+else
+  dir="$2"
+fi
+
+case "$file" in
+*.tar.gz | *.tgz) tar -xvzf "$file" -C "$dir" ;;
+*.tar.bz2 | *.tbz) tar -xvjf "$file" -C "$dir" ;;
+*.tar.xz | *.txz) tar -xvJf "$file" -C "$dir" ;;
+*.zip) unzip -o "$file" -d "$dir" ;;
+*.rar) unrar x "$file" "$dir" ;;
+*.7z) 7z x "$file" -o"$dir" ;;
+*)
+  echo "This format cannot unpack yet"
+  notify-send "This format cannot unpack yet"
+  ;;
+esac

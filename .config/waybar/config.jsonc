@@ -18,6 +18,7 @@
       "hyprland/workspaces",
     ],
     "modules-right": [
+      "cava",
       "bluetooth",
       "backlight",
       "pulseaudio",
@@ -53,7 +54,6 @@
         "*": 4, // 5 workspaces by default on every monitor
       }
     },
-  
     "bluetooth": {
 	    "format": " {status}",
 	    "format-disabled": "", // an empty format will hide the module
@@ -228,11 +228,15 @@
         "interval": 900,
         "return-type":"json",
     },
+
+    /*************************************
+    ************** UPDATES ***************
+    **************************************/ 
     "custom/updates": {
       "format": "<big></big> {}",
       "return-type": "json",
       "exec": "bash /home/akatsuki/.config/waybar/modules/chckup",
-      "interval": 7200,
+      "interval": 300,
     },
     /*************************************
     *********** POWER MANAGEMENT**********

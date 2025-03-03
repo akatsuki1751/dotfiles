@@ -1,0 +1,90 @@
+#!/bin/bash
+
+set +x
+
+fifo="/tmp/slurp_boxes_fifo"
+watch_workspace_pid=0
+geometry=""
+
+slurp_loop() {
+  local boxes=""
+  while true; do
+    boxes=$(cat "$fifo") # 读取最新的窗口信息
+    [[ -z "$boxes" ]] && {
+      continue
+    }
+
+    boxes=$(echo "$boxes" | awk '{for(i=1; i<=NF; i+=2) print $i, $(i+1)}')
+
+    # 启动带超时的交互式选择
+    geometry=$(slurp -r <<<"$boxes")
+    ret=$?
+
+    case $ret in
+    0) # 正常选择
+      echo "$geometry"
+      break
+      ;;
+    1)
+      echo "Quit"
+      break
+      ;;
+    *) # 其他错误
+      ;;
+    esac
+  done
+}
+
+get_box() {
+  box=$(hyprctl -j clients | jq -r '[.[] | select(.workspace.id == '$1')]' | jq -r '.[] | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')
+  echo "$box"
+}
+
+handle() {
+  do=0
+  ws=$(hyprctl activeworkspace -j | jq -r '.id')
+  case $1 in
+  workspacev2*)
+    ws=$(echo "$line" | grep -oP '>>\K[0-9]+')
+    do=1
+    ;;
+  openwindow* | closewindow*)
+    do=1
+    ;;
+  esac
+
+  if [ $do -eq 1 ]; then
+    pkill slurp 2>/dev/null
+    get_box "$ws" >"$fifo"
+  fi
+}
+
+watch_workspace() {
+  current_ws=$(hyprctl activeworkspace -j | jq -r '.id')
+  get_box "$current_ws" >"$fifo"
+
+  # 使用事件监听代替轮询
+  socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock |
+    while read -r line; do
+      handle "$line"
+    done
+}
+
+# prologue
+rm -f "$fifo"
+mkfifo "$fifo" || {
+  echo "创建管道失败"
+  exit 1
+}
+# 主程序流程
+watch_workspace &
+watch_workspace_pid=$!
+sleep 0.1 # 等待初始数据写入
+
+slurp_loop
+
+# epilogue
+kill "$watch_workspace_pid" 2>/dev/null
+pkill slurp 2>/dev/null
+rm -f "$fifo"
+exit 0

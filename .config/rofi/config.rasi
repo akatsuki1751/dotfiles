@@ -1,6 +1,7 @@
 configuration{
     modes:[window, drun, run, ssh, combi, filebrowser];
     terminal: "kitty";
+    inputbar-input: "fcitx";
     drun-display-format: "{icon} {name}";
     location: 0;
     disable-history: false;
@@ -13,5 +14,7 @@ configuration{
     display-dmenu: "󰯂 ";
 }
 
-@theme "/home/akatsuki/.config/rofi/themes/nord-multilines.rasi"
+//@theme "/home/akatsuki/.config/rofi/themes/nord-multilines.rasi"
 
+
+@theme "/home/akatsuki/.config/rofi/themes/nord-oneline.rasi"

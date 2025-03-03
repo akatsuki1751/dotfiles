@@ -1,0 +1,70 @@
+#!/home/akatsuki/oscript/bin/python3
+
+import subprocess
+import ollama
+from pathlib import Path
+
+# AI配置
+API_URL = "http://localhost:11434/api/generate"
+MODEL_NAME = "jack/llama3-8b-chinese:latest"  # 你的模型名称（通过 `ollama list` 确认）
+HISTORY_FILE = Path.home() / ".cache/info/chat_history"
+
+def net_test():
+    try:
+        # 测试网络连接
+        subprocess.run(["ping", "-c", "1", "8.8.8.8"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        return True
+    except subprocess.CalledProcessError:
+        try:
+            # 如果 ping 失败，尝试通过 curl 测试
+            subprocess.run(["curl", "-s", "--max-time", "2", "https://www.google.com"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            return True
+        except subprocess.CalledProcessError:
+            return False
+
+def ollama_quest(question):
+    # 调用 Ollama API
+    response = ollama.generate(model=MODEL_NAME, prompt=question, stream=True)
+    return response
+
+def main():
+    # 确保历史记录文件存在
+    HISTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    HISTORY_FILE.touch(exist_ok=True)
+
+    while True:
+        # 获取用户输入
+        question = subprocess.run(["rofi", "-dmenu", "-p", "Ask DeepSeek:", "-theme", "paper-float"], capture_output=True, text=True).stdout.strip()
+
+        # 检查输入
+        if not question:
+            break
+
+        # 记录历史（新增去重逻辑）
+        with open(HISTORY_FILE, "r+") as f:
+            lines = f.readlines()
+            if question + "\n" not in lines:
+                f.write(question + "\n")
+
+        # 转义引号
+        question = question.replace('"', '\\"')
+
+        if not net_test():
+            subprocess.run(["notify-send", "network has connected"])
+            break
+        else:
+            response = ollama_quest(question)
+            full_answer = ""
+            for chunk in response:
+                chunk_answer = chunk.get("response", "")
+                full_answer += chunk_answer
+                subprocess.run(["rofi", "-theme", "paper-float", "-e", f"Question：{question}\n\nAnswer：\n{full_answer}"])
+
+        # 解析响应（Ollama 的响应格式）
+        # answer = response["response"]
+
+        # 显示结果（带滚动条）
+        # subprocess.run(["rofi","-theme", "paper-float", "-e", f"Question：{question}\n\nAnswer：\n{answer}"])
+
+if __name__ == "__main__":
+    main()

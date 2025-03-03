@@ -10,4 +10,4 @@ rofi
 
 pip3:
 request
-
+ollama

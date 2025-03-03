@@ -1,6 +1,8 @@
 #!/bin/bash
 
-caps="$(cat /sys/class/leds/input3::capslock/brightness || cat /sys/class/leds/input10::capslock/brightness)"
+led="/sys/class/leds/"
+key=$(ls "$led" | grep "capslock" | head -n 1)
+caps=$(cat "$led$key/brightness")
 
 if [ "$caps" == "1" ]; then
   echo '{"text": "A", "class": "caps-on", "tooltip": "Caps Lock is ON","alt":"1"}'

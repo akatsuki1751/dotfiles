@@ -1,0 +1,176 @@
+#!/home/akatsuki/oscript/bin/python3
+
+import argparse
+from prettytable import PrettyTable
+from math import *
+import re
+import operator
+
+CONSTANT = ['pi', 'e', 'tau', 'inf', 'nan']
+# 常量配置，命令映射
+COMMANDS = {
+    "q": "quit",
+    "quit": "quit",
+    "exit": "quit",
+    "set": "set",
+    "p": "print",
+    "print": "print",
+    "h": "help",
+    "help": "help",
+    "history": "history"
+}
+
+MENU = """
++-----------------+---------------------------------------------------------------------------+
+|    Commands     |                           description                                     |
++-----------------+---------------------------------------------------------------------------+
+| q, quit, exit   | Exit the interactive mode.                                                |
+| set <reg>       | Set the current result (ANS) into the specified register (e.g., set a).   |
+| p, print        | Print all registers (a, b, c, ..., k) and their current values.           |
+| history         | show the history of current session.                                      |
+| h, help         | Show this help menu with available commands.                              |
+| <expr>          | You can enter mathematical expressions to be evaluated (e.g., 2 + 3).     |
+| <ANS>           | The last calculation result is stored in 'ANS' and can use it later.      |
++-----------------+---------------------------------------------------------------------------+
+"""
+
+class Calculator:
+    def __init__(self):
+        self.ANS = 0
+        self.registers = {chr(i): '0' for i in range(ord('a'), ord('d') + 1)}
+        self.history = []
+        
+    def eval_expression(self, expr):
+        """ evaluate the expression in security mode """
+        try:
+            # replace the `ANS` and `registers` value
+            expr = expr.replace('ANS', str(self.ANS))
+            for reg, value in self.registers.items():
+                expr = expr.replace(reg, str(value))
+            
+            # 使用安全的 eval 或自己实现的计算器逻辑
+            result = eval(expr)
+            
+            return result
+
+        except Exception as e:
+            print(f"Error in expression: {e}")
+            return None
+
+    def set_register(self, reg, val=None):
+        """ 
+        store the value to the register 
+        reg: a, b, c, d, e
+        val: <num>, None, <reg>, <math-constant>
+        """
+        if not reg in self.registers:
+            print(f"no such a register, only exist register a~e")
+            return 
+        match val:
+            case None:
+                val = f"{self.ANS}"
+            case _ if re.match(r'^-?\d+(\.\d+)?$', val):
+                pass
+            case _ if val in CONSTANT:
+                pass
+            case _ if val in self.registers:
+                val = self.registers[val]
+            case _:
+                print("value must be a number or a math-constant")
+                return
+        self.registers[reg] = val
+        print(f"set {val} to register {reg}")
+
+    def print_attr(self):
+        """ print the variable in calculator """
+        table = PrettyTable()
+    
+        table.field_names = ["Register", "Value"]
+        
+        for reg, value in self.registers.items():
+            table.add_row([reg, value])
+        table.add_row(["ANS", self.ANS])
+
+        print(table)
+
+    def process_command(self, expression):
+        """ handling the input command """
+
+        parts = expression.split()
+        
+        if len(parts) == 0:
+            return
+        
+        cmd = parts[0]
+        # if no keywords, then it's a expression
+        if cmd not in COMMANDS:
+            result = self.eval_expression(expression)
+            if result is not None:
+                self.ANS = result
+                self.history.append(f"{expression} = {result}")
+                print(result)
+            return None
+
+        command = COMMANDS[cmd]
+        match command:
+            case "quit":
+                return "quit"
+            case "set":
+                if len(parts) < 2 or len(parts) > 3:
+                    print("Input error: Invalid number of arguments.")
+                    return
+                
+                if len(parts) == 2:
+                    self.set_register(parts[1])  # only pass reg_name, set ANS to reg
+                else:
+                    self.set_register(parts[1], parts[2])  # if exist number, set val to reg
+            case "print":
+                self.print_attr()
+            case "history":
+                if self.history:
+                    print("\n".join(f"{record}" for record in reversed(self.history)))
+                else:
+                    print("No history yet.")
+            case "help":
+                print(MENU)
+        
+        return None
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Calculate the math expression")
+    parser.add_argument('-s', '--scale', type=int, help="The number of decimal places retained in the result")
+    parser.add_argument('expression', type=str, nargs='?', default=None, help="The expression you need to evaluate")
+    args = parser.parse_args()
+
+    if args.expression is None:
+        repl()
+    else:
+        try:
+            # calc = Calculator()
+            # result = calc.eval_expression(args.expression)
+            result = eval(args.expression)
+            
+            if result is not None and args.scale:
+                result = f"{result:.{args.scale}f}"
+            
+            print(result)
+        except Exception as e:
+            print(f"Calculate error: {e}")
+
+
+def repl():
+    calc = Calculator()
+    print("Welcome to interactive mode, type 'h' for help")
+    
+    while True:
+        expression = input("\033[35m>>> \033[0m")
+        command_result = calc.process_command(expression)
+        
+        if command_result == "quit":
+            break
+
+
+if __name__ == '__main__':
+    main()
+

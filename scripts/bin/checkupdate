@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # check the available upgradable packages
-
-upgrade_info=$(paru -Q --upgrades 2>/dev/null)
+# set the paru to `sudo visudo` as `<username> ALL=(ALL) NOPASSWD: /usr/bin/paru`
+sudo paru -Sy --noconfirm --needed --disable-download-timeout >/dev/null 2>&1
+upgrade_info=$(paru -Qu 2>/dev/null)
 
 # handle the fail situation
 # 1. output mess stuff --- network error

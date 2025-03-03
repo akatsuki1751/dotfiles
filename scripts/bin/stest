@@ -1,0 +1,25 @@
+#!/bin/bash
+
+handle() {
+  do=false
+  case $1 in
+  workspacev2*)
+    echo -e "\nworkspace has changed\n"
+    echo "$line" | grep -oP '>>\K[0-9]+'
+    do=true
+    ;;
+  openwindow* | closewindow*)
+    echo -e "\nwindow has changed\n"
+    do=true
+    ;;
+  esac
+  if [ $do == true ]; then
+    echo -e "\nsomething has changed\n"
+  fi
+}
+
+socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock |
+  while read -r line; do
+    echo "$line"
+    handle "$line"
+  done

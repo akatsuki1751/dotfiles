@@ -28,8 +28,8 @@ notify_user() {
 # slurp_loop: maintain a slurp in frontground with option `-r`, which will receive the box info, and highlight the current hovering window
 get_geometry() {
   cleanup() {
-    kill -- -$watch_pid 2>/dev/null # 终止所有子进程
-    pkill -P $watch_pid 2>/dev/null # 终止所有子进程
+    kill -- -$watch_pid 2>/dev/null
+    # pkill -P $watch_pid 2>/dev/null 
     pkill slurp 2>/dev/null
     rm -f "$fifo"
   }
@@ -59,7 +59,6 @@ get_geometry() {
   }
 
   watch_window_change() {
-    trap 'exit 0' INT TERM # 确保 SIGTERM 终止进程
     local current_ws=$(hyprctl activeworkspace -j | jq -r '.id')
     get_box "$current_ws" >"$fifo"
 
@@ -119,7 +118,7 @@ shotwin() {
 
 # take shots
 shotscreen() {
-  cd "${dir}" && grim "$file"
+  cd "${dir}" && grim - | swappy -f - -o "$file"
   wl-copy <"${dir}"/"$file"
   notify_user
 }
